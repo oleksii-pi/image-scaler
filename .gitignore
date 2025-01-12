@@ -1,0 +1,3 @@
+venv
+**/scaled
+.DS_Store
