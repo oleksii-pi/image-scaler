@@ -38,6 +38,7 @@ chmod +x run.sh
 
 ## Output:
 
+- Processes all unprocessed subfolders in the current folder that do not yet contain a `scaled` subfolder.
 - Scaled images are saved in a `scaled` subfolder within each processed directory.
 - Archives are named using the folder name and size (e.g., `Birds_16x20.zip`).
 - If an archive exceeds 20MB, it is split into multiple archives (e.g., `Birds_16x20_2.zip`).
