@@ -1,3 +1,6 @@
 venv
 **/scaled
 .DS_Store
+google-drive-credentials.json
+token.json
+**/download-instructions-*.pdf
