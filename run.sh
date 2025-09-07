@@ -23,7 +23,7 @@ source "$VENV_DIR/bin/activate"
 # Install required packages
 echo "Installing required Python packages..."
 pip install --upgrade pip
-pip install pillow
+pip install -r requirements.txt
 echo "Packages installed."
 
 # Run the Python script
