@@ -90,5 +90,10 @@ if __name__ == "__main__":
 
     for folder in os.listdir(images_dir):
         folder_path = os.path.join(images_dir, folder)
-        if os.path.isdir(folder_path) and "scaled" not in os.listdir(folder_path):
+        # Skip venv folder and folders that already have 'scaled'
+        if (
+            os.path.isdir(folder_path)
+            and folder != "venv"
+            and "scaled" not in os.listdir(folder_path)
+        ):
             process_folder(folder_path)
