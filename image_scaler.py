@@ -15,6 +15,11 @@ SCALES = {
 
 def scale_and_crop(image_path, size):
     with Image.open(image_path) as img:
+        # Check if image is horizontal and rotate if needed
+        should_rotate = img.width > img.height
+        if should_rotate:
+            img = img.rotate(90, expand=True)
+        
         aspect_ratio = img.width / img.height
         target_width, target_height = size
         target_aspect_ratio = target_width / target_height
