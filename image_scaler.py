@@ -15,10 +15,14 @@ SCALES = {
 
 def scale_and_crop(image_path, size):
     with Image.open(image_path) as img:
+        # Convert to RGB mode to ensure consistent color handling
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
+            
         # Check if image is horizontal and rotate if needed
         should_rotate = img.width > img.height
         if should_rotate:
-            img = img.rotate(90, expand=True)
+            img = img.rotate(90, expand=True, resample=Image.BICUBIC)
         
         aspect_ratio = img.width / img.height
         target_width, target_height = size
@@ -64,7 +68,8 @@ def process_folder(folder_path):
                 scaled_dir, f"{idx}_{folder_name}_{scale_name}.png"
             )
             scaled_image = scale_and_crop(image_path, size)
-            scaled_image.save(scaled_image_path, format="PNG")
+            # Save with maximum quality settings
+            scaled_image.save(scaled_image_path, format="PNG", optimize=False)
             scaled_images.append(scaled_image_path)
 
         archive_base_name = os.path.join(scaled_dir, f"{folder_name}_{scale_name}")
