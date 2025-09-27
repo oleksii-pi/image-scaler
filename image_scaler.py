@@ -12,7 +12,6 @@ SCALES = {
     "24x36": (1728, 2592),
     "50x70": (1890, 2646), 
 }
-MAX_ARCHIVE_SIZE = 20 * 1024 * 1024  # 20MB in bytes
 
 def scale_and_crop(image_path, size):
     with Image.open(image_path) as img:
@@ -41,6 +40,7 @@ def create_zip(archive_path, files):
             zipf.write(file_path, arcname)
 
 def process_folder(folder_path):
+    print(f"Processing folder: {folder_path}")
     folder_name = os.path.basename(folder_path)
     scaled_dir = os.path.join(folder_path, "scaled")
     os.makedirs(scaled_dir, exist_ok=True)
@@ -63,27 +63,13 @@ def process_folder(folder_path):
             scaled_images.append(scaled_image_path)
 
         archive_base_name = os.path.join(scaled_dir, f"{folder_name}_{scale_name}")
-        current_archive_idx = 1
-        current_archive_size = 0
         current_files = []
-
         for scaled_image_path in scaled_images:
-            file_size = os.path.getsize(scaled_image_path)
-
-            if current_archive_size + file_size > MAX_ARCHIVE_SIZE:
-                archive_path = f"{archive_base_name}_{current_archive_idx}.zip"
-                create_zip(archive_path, current_files)
-                current_files = []
-                current_archive_size = 0
-                current_archive_idx += 1
-
             arcname = os.path.basename(scaled_image_path)
             current_files.append((scaled_image_path, arcname))
-            current_archive_size += file_size
 
-        if current_files:
-            archive_path = f"{archive_base_name}_{current_archive_idx}.zip"
-            create_zip(archive_path, current_files)
+        archive_path = f"{archive_base_name}.zip"
+        create_zip(archive_path, current_files)
 
 if __name__ == "__main__":
     images_dir = os.path.expanduser(BASE_DIR)
