@@ -25,6 +25,7 @@ from __future__ import annotations
 import os
 import sys
 import logging
+import argparse
 from pathlib import Path
 from typing import Optional, List, Tuple
 
@@ -284,12 +285,12 @@ def delete_all_files_in_folder(folder: Path) -> None:
     logging.info(f"Deleted {count} files in {folder}")
 
 
-def process_folder(service, parent_folder: Path, scaled_folder: Path) -> None:
+def process_folder(service, parent_folder: Path, scaled_folder: Path, remove_scaled: bool = False) -> None:
     """
     Process one folder:
       - Ensure /scaled/<FolderName>/ on Drive
       - Upload all .zip files from scaled
-      - Delete all files from scaled
+      - Optionally delete all files from scaled (if remove_scaled=True)
       - Make Drive folder public, get link
       - Create PDF and upload it
     """
@@ -312,8 +313,9 @@ def process_folder(service, parent_folder: Path, scaled_folder: Path) -> None:
     else:
         logging.info("No .zip files found to upload.")
 
-    # Empty the local scaled folder (delete every file)
-    delete_all_files_in_folder(scaled_folder)
+    # Empty the local scaled folder (delete every file) - only if requested
+    if remove_scaled:
+        delete_all_files_in_folder(scaled_folder)
 
     # Make the folder public & get the share link
     link = drive_make_public_and_get_link(service, drive_target_id)
@@ -338,8 +340,15 @@ def process_folder(service, parent_folder: Path, scaled_folder: Path) -> None:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description="Upload .zip files to Google Drive and create download instructions")
+    parser.add_argument("--remove-scaled", action="store_true", 
+                       help="Remove all files from local 'scaled' folders after uploading")
+    args = parser.parse_args()
+
     setup_logging()
     logging.info(f"Scanning in: {LOCAL_ROOT}")
+    if args.remove_scaled:
+        logging.info("Will remove files from scaled folders after upload")
 
     try:
         service = get_drive_service()
@@ -354,7 +363,7 @@ def main() -> int:
 
     for parent, scaled in candidates:
         try:
-            process_folder(service, parent, scaled)
+            process_folder(service, parent, scaled, args.remove_scaled)
         except Exception as e:
             logging.error(f"Unexpected error processing {parent.name}: {e}")
 
