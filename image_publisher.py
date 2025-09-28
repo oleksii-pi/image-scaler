@@ -45,6 +45,9 @@ TOKEN_FILE = 'token.json'
 # Root path in Drive where we create folders; 'root' means My Drive root
 DRIVE_ROOT_PARENT_ID = 'root'
 
+# Directories to exclude when scanning for folders
+EXCLUDED_DIRS = {'.git', 'venv'}
+
 # Local scanning root (current directory)
 LOCAL_ROOT = Path('.').resolve()
 
@@ -249,7 +252,7 @@ def scan_candidate_folders(root: Path) -> List[Tuple[Path, Path]]:
     """
     candidates: List[Tuple[Path, Path]] = []
     for entry in root.iterdir():
-        if entry.is_dir():
+        if entry.is_dir() and entry.name not in EXCLUDED_DIRS:
             scaled = entry / 'scaled'
             if scaled.is_dir():
                 # "not empty" => contains at least one file or folder entry
