@@ -2,7 +2,7 @@
 """
 image_publisher.py
 
-Iterates subfolders that contain a non-empty "scaled" subfolder.
+Iterates subfolders that do not contain "download-instructions-*.pdf" files.
 - Uploads all .zip files inside each "scaled" to Google Drive under /scaled/<FolderName>/
 - Empties the local "scaled" folder (deletes all files, keeps folder)
 - Makes the Drive folder public (link-anyone viewer)
@@ -248,19 +248,24 @@ def wrap_text(s: str, max_chars: int) -> List[str]:
 def scan_candidate_folders(root: Path) -> List[Tuple[Path, Path]]:
     """
     Return a list of (folder, scaled_subfolder) for all immediate subfolders
-    under root that contain a non-empty 'scaled' subfolder.
+    under root that do not contain "download-instructions-*.pdf" files and have a 'scaled' subfolder.
     """
     candidates: List[Tuple[Path, Path]] = []
     for entry in root.iterdir():
         if entry.is_dir() and entry.name not in EXCLUDED_DIRS:
-            scaled = entry / 'scaled'
-            if scaled.is_dir():
-                # "not empty" => contains at least one file or folder entry
-                try:
-                    if any(scaled.iterdir()):
+            # Check if folder contains any download-instructions-*.pdf files
+            has_download_instructions = any(
+                f.is_file() and f.name.startswith("download-instructions-") and f.name.endswith(".pdf")
+                for f in entry.iterdir()
+            )
+            
+            if not has_download_instructions:
+                scaled = entry / 'scaled'
+                if scaled.is_dir():
+                    try:
                         candidates.append((entry, scaled))
-                except PermissionError:
-                    logging.warning(f"Skipping (no access): {scaled}")
+                    except PermissionError:
+                        logging.warning(f"Skipping (no access): {scaled}")
     return candidates
 
 
@@ -344,7 +349,7 @@ def main() -> int:
 
     candidates = scan_candidate_folders(LOCAL_ROOT)
     if not candidates:
-        logging.info("No folders with a non-empty 'scaled' subfolder were found. Nothing to do.")
+        logging.info("No folders without download-instructions PDF files were found. Nothing to do.")
         return 0
 
     for parent, scaled in candidates:
