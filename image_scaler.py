@@ -57,7 +57,7 @@ def process_folder(folder_path):
     image_paths = [
         os.path.join(folder_path, f)
         for f in os.listdir(folder_path)
-        if f.lower().endswith(".png")
+        if f.lower().endswith((".png", ".webp", ".jpg", ".jpeg"))
     ]
 
     for scale_name, size in SCALES.items():
